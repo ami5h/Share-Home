@@ -1,0 +1,8 @@
+.env
+smb/
+bin/
+.claude/
+CLAUDE.md
+CLEANUP.md
+FEATURES.md
+TODO.md

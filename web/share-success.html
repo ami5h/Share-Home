@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved</title>
+<style>
+body { margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; background: #f5f5f7; }
+.card { text-align: center; padding: 32px; }
+.check { width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%; background: #34c759; display: flex; align-items: center; justify-content: center; }
+h2 { margin: 0; color: #1d1d1f; }
+p { margin: 8px 0 0; color: #6e6e73; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="check">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 16 14 22 24 10"/></svg>
+  </div>
+  <h2>Saved!</h2>
+  <p>Closing…</p>
+</div>
+<script>setTimeout(function() { if (window.opener) window.close(); else window.location.href = '/'; }, 2000);</script>
+</body>
+</html>

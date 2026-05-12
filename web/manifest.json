@@ -1,0 +1,30 @@
+{
+  "name": "Share Home",
+  "short_name": "Share Home",
+  "description": "Share files, clipboard, and URLs on your home network",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#0071e3",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "share_target": {
+    "action": "/api/share",
+    "method": "POST",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

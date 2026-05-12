@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+          cache-dir: ~/.go-cache
+
+      - name: Download dependencies
+        run: go mod download
+        working-directory: go
+
+      - name: Vet
+        run: go vet ./...
+        working-directory: go
+
+      - name: Test with coverage
+        run: go test ./... -race -coverprofile=cover.out -covermode=atomic
+        working-directory: go
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: go/cover.out
+          flags: unittests
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Build server
+        run: go build -o /dev/null ./cmd/server/
+        working-directory: go
+
+      - name: Build CLI
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /dev/null .
+        working-directory: cli
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker compose build
+
+      - name: Smoke test
+        run: |
+          # Copy .env.example to .env for the container
+          cp .env.example .env
+          # Start in background
+          docker compose up -d
+          # Wait for service
+          sleep 10
+          # Check it's running
+          docker compose ps
+          docker compose logs share-home || true
