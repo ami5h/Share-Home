@@ -5,8 +5,8 @@ services:
       dockerfile: go/Dockerfile
     container_name: share-home-app
     environment:
-      - SMB_HOST=${SMB_HOST:-10.0.0.1}
-      - SMB_SHARE=${SMB_SHARE:-share_home}
+      - SMB_HOST=${SMB_HOST}
+      - SMB_SHARE=${SMB_SHARE}
       - SMB_USERNAME=${SMB_USERNAME}
       - SMB_PASSWORD=${SMB_PASSWORD}
       - SMB_BASE_DIR=share-home

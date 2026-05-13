@@ -59,7 +59,6 @@ A self-hosted file sharing and clipboard service for your home network. Upload f
 | `go/internal/model/` | Shared data models |
 | `web/` | Frontend — `index.html`, `app.js`, `style.css`, PWA assets |
 | `cli/` | CLI client — standalone Go binary with stdlib only |
-| `scripts/` | Helper scripts (SMB mount/umount) |
 
 ### API Endpoints
 
