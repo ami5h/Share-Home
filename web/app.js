@@ -566,8 +566,12 @@
   // --- Paste ---
 
   var pastePreview = document.getElementById('paste-preview');
+  var lastPaste = 0;
 
   function handlePaste(data) {
+    var now = Date.now();
+    if (now - lastPaste < 500) return;
+    lastPaste = now;
     if (!data) return;
 
     // Try image first from clipboard items
@@ -642,64 +646,73 @@
 
   // Paste button
   document.getElementById('paste-btn').addEventListener('click', function() {
-    // Try Clipboard API first (Chrome, Safari 16.4+)
-    if (navigator.clipboard && navigator.clipboard.read) {
-      navigator.clipboard.read().then(function(items) {
-        for (var i = 0; i < items.length; i++) {
-          var it = items[i];
-          var imgType = it.types.find(function(t) { return t.startsWith('image/'); });
-          if (imgType) {
-            it.getType(imgType).then(function(blob) {
-              handlePaste({ items: [{ getAsFile: function() { return blob; }, type: imgType }], files: [blob] });
-            });
-            return;
-          }
-        }
-        if (items.length > 0 && items[0].types.includes('text/plain')) {
-          items[0].getType('text/plain').then(function(b) { return b.text(); }).then(function(t) {
-            if (t) handlePaste({ text: t }); else toast('Clipboard is empty', 'error');
-          });
-        } else { toast('Clipboard is empty', 'error'); }
-      }).catch(function() {
-        // Clipboard.read() denied - show paste input
-        showPasteInput();
-      });
-    } else {
-      // No Clipboard API - show paste input
+    var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile || !(navigator.clipboard && navigator.clipboard.read)) {
+      // Mobile or no Clipboard API — show paste target
       showPasteInput();
+      return;
     }
+    // Desktop with Clipboard API support
+    navigator.clipboard.read().then(function(items) {
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        var imgType = it.types.find(function(t) { return t.startsWith('image/'); });
+        if (imgType) {
+          it.getType(imgType).then(function(blob) {
+            handlePaste({ items: [{ getAsFile: function() { return blob; }, type: imgType }], files: [blob] });
+          });
+          return;
+        }
+      }
+      if (items.length > 0 && items[0].types.includes('text/plain')) {
+        items[0].getType('text/plain').then(function(b) { return b.text(); }).then(function(t) {
+          if (t) handlePaste({ text: t }); else toast('Clipboard is empty', 'error');
+        });
+      } else { toast('Clipboard is empty', 'error'); }
+    }).catch(function() {
+      showPasteInput();
+    });
   });
 
   // Show a contenteditable area for manual paste (Firefox, Safari fallback)
   function showPasteInput() {
-    var el = document.getElementById('paste-input');
-    if (!el) {
-      el = document.createElement('div');
+    var container = document.getElementById('paste-input-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'paste-input-container';
+      container.style.cssText = 'margin-top:12px;';
+
+      var hint = document.createElement('p');
+      hint.style.cssText = 'font-size:12px;color:var(--text-secondary);margin-bottom:8px;';
+      hint.textContent = 'Tap below, then long-press and select "Paste" to paste from your clipboard.';
+      container.appendChild(hint);
+
+      var el = document.createElement('div');
       el.id = 'paste-input';
       el.contentEditable = true;
       el.className = 'preview-area';
-      el.setAttribute('placeholder', 'Paste here (Ctrl+V / Cmd+V)...');
-      el.style.cssText = 'min-height:80px;outline:none;cursor:text;margin-top:12px;';
+      el.style.cssText = 'min-height:80px;outline:none;cursor:text;';
 
       el.addEventListener('paste', function(e) {
         var cd = e.clipboardData;
         if (!cd) return;
         e.preventDefault();
-        el.classList.add('hidden');
+        container.classList.add('hidden');
         el.textContent = '';
         handlePaste(cd);
       });
 
       el.addEventListener('blur', function() {
-        if (el.textContent.trim() === '') el.classList.add('hidden');
+        if (el.textContent.trim() === '') container.classList.add('hidden');
       });
 
+      container.appendChild(el);
       var preview = document.getElementById('paste-preview');
-      preview.parentNode.insertBefore(el, preview.nextSibling);
+      preview.parentNode.insertBefore(container, preview.nextSibling);
     }
-    el.textContent = '';
-    el.classList.remove('hidden');
-    el.focus();
+    container.classList.remove('hidden');
+    container.querySelector('#paste-input').textContent = '';
+    container.querySelector('#paste-input').focus();
   }
 
   // --- URL Shortener ---
